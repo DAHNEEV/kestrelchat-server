@@ -16,28 +16,14 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-mod gateway;
-mod opcode;
-mod protocol;
+use serde::Deserialize;
+use serde_json::Value;
 
-use rocket::Config;
+use crate::opcode::OpCode;
 
-#[macro_use]
-extern crate rocket;
-
-#[launch]
-fn rocket() -> _ {
-    let config = Config {
-        address: "127.0.0.1".parse().unwrap(),
-        port: 5180, // I think for Kestrel by default we will allocate ports 5180-5189 to us. - Stribes
-        ..Config::default()
-    };
-
-    rocket::custom(config).mount("/", routes![gateway_route])
-}
-
-// This feels bad, if anyone has a nicer way todo this please make a PR!
-#[get("/")]
-fn gateway_route(ws: ws::WebSocket) -> ws::Channel<'static> {
-    gateway::gateway(ws)
+#[derive(Debug, Deserialize)]
+pub struct Packet {
+    pub op: OpCode,
+    pub t: Option<String>,
+    pub d: Value,
 }

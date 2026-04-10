@@ -5,4 +5,6 @@ edition = "2024"
 
 [dependencies]
 rocket = "0.5.1"
+serde = "1.0.228"
+serde_json = "1.0.149"
 ws = { package = "rocket_ws", version = "0.1.1" }
