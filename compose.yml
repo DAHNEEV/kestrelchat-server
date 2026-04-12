@@ -1,0 +1,13 @@
+version: "3.9"
+name: kestrel
+
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: crates/services/gateway/Dockerfile
+
+    ports:
+      - "5180:5180"
+
+    restart: unless-stopped
