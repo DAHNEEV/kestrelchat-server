@@ -29,11 +29,11 @@ extern crate rocket;
 
 #[launch]
 fn rocket() -> _ {
-    let config = Config {
+    let rocket_config = Config {
         address: "0.0.0.0".parse().expect("valid bind address"), // This is needed to run it under Docker, we will have a config flag for running under docker (defaulted to true)
         port: 5180, // I think for Kestrel by default we will allocate ports 5180-5189 to us. - Stribes
         ..Config::default()
     };
 
-    rocket::custom(config).mount("/", routes![gateway_route])
+    rocket::custom(rocket_config).mount("/", routes![gateway_route])
 }
