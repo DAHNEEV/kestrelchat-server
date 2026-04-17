@@ -34,7 +34,7 @@ impl TryFrom<u8> for OpCode {
             1 => Ok(OpCode::Heartbeat),
             2 => Ok(OpCode::Identify),
             other => Err(format!("unknown opcode: {other}")),
-            // Bagels. - Stribes
+            // Everything Bagels. - Stribes
         }
     }
 }
