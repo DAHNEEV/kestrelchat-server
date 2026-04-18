@@ -18,17 +18,20 @@
 
 pub mod routes;
 
-use rocket::Config;
+use config::Config as AppConfig;
+use rocket::Config as RocketConfig;
 
 #[macro_use]
 extern crate rocket;
 
 #[launch]
 async fn rocket() -> _ {
-    let rocket_config = Config {
-        address: "0.0.0.0".parse().expect("valid bind address"),
-        port: 5181,
-        ..Config::default()
+    let config = AppConfig::load().expect("Failed to load config");
+
+    let rocket_config = RocketConfig {
+        address: config.network.host.parse().expect("valid bind address"),
+        port: config.network.ports.api,
+        ..RocketConfig::default()
     };
 
     let swagger =

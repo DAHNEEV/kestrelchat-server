@@ -16,27 +16,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-mod gateway;
-mod handlers;
-mod protocol;
+use serde::Deserialize;
 
-use config::Config as AppConfig;
-use rocket::Config as RocketConfig;
+#[derive(Debug, Deserialize)]
+pub struct NetworkConfig {
+    pub host: String,
+    pub ports: Ports,
+}
 
-use crate::gateway::gateway_route;
-
-#[macro_use]
-extern crate rocket;
-
-#[launch]
-fn rocket() -> _ {
-    let config = AppConfig::load().expect("Failed to load config");
-
-    let rocket_config = RocketConfig {
-        address: config.network.host.parse().expect("valid bind address"),
-        port: config.network.ports.gateway,
-        ..RocketConfig::default()
-    };
-
-    rocket::custom(rocket_config).mount("/", routes![gateway_route])
+#[derive(Debug, Deserialize)]
+pub struct Ports {
+    pub gateway: u16,
+    pub api: u16,
 }
