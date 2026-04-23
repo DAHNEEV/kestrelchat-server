@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://github.com/kestrelchat/backend/blob/master/assets/README/banner.png?raw=true" alt="Kestrel Banner">
+    <img src="https://github.com/kestrelchat/backend/blob/prod/assets/README/banner.png?raw=true" alt="Kestrel Banner">
 </p>
 <p align="center">
   <img src="https://img.shields.io/badge/Rust-1.94%2B-6e6ade?style=for-the-badge&logo=rust&logoColor=white" />
