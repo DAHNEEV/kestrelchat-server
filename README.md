@@ -1,16 +1,22 @@
-<h1>
-  Kestrel Backend
-  
-  ![Rust](https://img.shields.io/badge/rust-1.94%2B-orange?style=flat-square&logo=rust)
-  [![License](https://img.shields.io/github/license/kestrelchat/backend?style=flat-square&logoColor=white)](https://github.com/kestrelchat/backend/blob/main/LICENSE)
-  [![Contributors](https://img.shields.io/github/contributors/kestrelchat/backend?style=flat-square&logoColor=white)](https://github.com/kestrelchat/backend/graphs/contributors)
-  [![Stars](https://img.shields.io/github/stars/kestrelchat/backend?style=flat-square&logoColor=white)](https://github.com/kestrelchat/backend/stargazers)
-  [![Forks](https://img.shields.io/github/forks/kestrelchat/backend?style=flat-square&logoColor=white)](https://github.com/kestrelchat/backend/network/members)
-  [![Pull Requests](https://img.shields.io/github/issues-pr/kestrelchat/backend?style=flat-square&logoColor=white)](https://github.com/kestrelchat/backend/pulls)
-  [![Issues](https://img.shields.io/github/issues/kestrelchat/backend?style=flat-square&logoColor=white)](https://github.com/kestrelchat/backend/issues)
-</h1>
-Monorepo for Kestrel's backend services<br/>
-</div>
+<p align="center">
+    <img src="https://github.com/kestrelchat/backend/blob/master/assets/README/banner.png?raw=true" alt="Kestrel Banner">
+</p>
+<p align="center">
+  <img src="https://img.shields.io/badge/Rust-1.94%2B-6e6ade?style=for-the-badge&logo=rust&logoColor=white" />
+  <img src="https://img.shields.io/github/license/kestrelchat/backend?style=for-the-badge&color=6e6ade" />
+  <img src="https://img.shields.io/github/stars/kestrelchat/backend?style=for-the-badge&color=6e6ade" />
+  <img src="https://img.shields.io/github/forks/kestrelchat/backend?style=for-the-badge&color=6e6ade" />
+  <img src="https://img.shields.io/github/last-commit/kestrelchat/backend?style=for-the-badge&color=6e6ade" />
+  <img src="https://img.shields.io/github/commit-activity/m/kestrelchat/backend?style=for-the-badge&color=6e6ade" />
+  <img src="https://img.shields.io/github/contributors/kestrelchat/backend?style=for-the-badge&color=6e6ade" />
+  <img src="https://img.shields.io/github/issues/kestrelchat/backend?style=for-the-badge&color=6e6ade" />
+  <img src="https://img.shields.io/github/issues-pr/kestrelchat/backend?style=for-the-badge&color=6e6ade" />
+  <img src="https://img.shields.io/github/languages/code-size/kestrelchat/backend?style=for-the-badge&color=6e6ade" />
+  <img src="https://www.aschey.tech/tokei/github.com/kestrelchat/backend?style=for-the-badge&color=6e6ade&branch=prod&language=Rust,Dockerfile,Python" />
+  <a href="https://discord.gg/T8rAX8DmNS">
+    <img src="https://img.shields.io/discord/1453177758233661706?style=for-the-badge&logo=discord&logoColor=white&color=6e6ade" />
+  </a>
+</p>
 
 # Getting Started
 <!--If anyone's good at writing Docs and sees this, reach out to me in Kestrel's community please - Stribes-->
