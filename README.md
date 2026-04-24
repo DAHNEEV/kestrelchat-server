@@ -22,6 +22,8 @@
 
 Kestrel is a modern instant-messaging service written in Rust.
 
+This repository contains only the backend implementation of the system.
+
 It exists because most chat platforms don’t care, are closed, or simply feel clunky. <!--Some of them also just… suck. Looking at you, Valour.-->
 
 # Contributing
@@ -77,7 +79,7 @@ cargo run -p <service>
 
 Any external services (databases, cdns, etc.) must be configured in ``kestrel.toml``.
 
-# External Librarys
+# External Libraries
 
 Kestrel is built on top of the following open-source Rust libraries:
 
