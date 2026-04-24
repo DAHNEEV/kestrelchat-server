@@ -24,46 +24,67 @@ Kestrel is a modern instant-messaging service written in Rust.
 
 It exists because most chat platforms don’t care, are closed, or simply feel clunky. <!--Some of them also just… suck. Looking at you, Valour.-->
 
-# Getting Started
-<!--If anyone's good at writing Docs and sees this, reach out to me in Kestrel's community please - Stribes-->
+# Contributing
 ## Prerequisites
 
-Before Running Kestrel, ensure you have:
-- Rust (latest stable recommended)
-- Docker + Docker Compose (recommended)
-
+- Install Rust 1.94+
+- Any IDE with Rust support (I recommend Zed!) <!--With ai turned off, please.-->
+- Docker with Docker Compose (recommended)
 
 ## Configuration
 Kestrel uses a shared TOML configuration file.
 
-Create your local config:
-```bash
-cp kestrel.example.toml kestrel.toml
-```
+To get started, copy the example file `kestrel.example.toml` to `kestrel.toml`
 
-Then configure it for your environment.
+Everything should be preconfigured for hosting on a single machine, through docker.
 
-## Running with Docker 
-Kestrel is designed to run as multiple isolated services.
+# Structure
 
-Start the full stack:
+## a.) Services
+- **gateway** — WebSocket handling
+- **api** — REST API backend
+
+## b.) Library
+- **config** — Shared configuration library for Kestrel
+
+## Running
+
+### 1) With Docker
+
+> Reccomended for most users.
+
+To run all services:
 ```bash
 docker compose up --build
 ```
 
-## Running Manually
+To run specific services:
+```bash
+docker compose up --build api
+```
 
-### 1. Set config path
+### 2) Without Docker
+
+Set your config path:
 ```bash
 export KESTREL_CONFIG=path/to/kestrel.toml
 ```
 
-### 2. Run services
-Gateway:
+Then run the services manually with:
 ```bash
-cargo run -p gateway
+cargo run -p <service>
 ```
-API:
-```bash
-cargo run -p api
-```
+
+Any external services (databases, cdns, etc.) must be configured in ``kestrel.toml``.
+
+# External Librarys
+
+Kestrel is built on top of the following open-source Rust libraries:
+
+- [Serde](https://github.com/serde-rs/serde)
+- [Serde JSON](https://github.com/serde-rs/json)
+- [TOML](https://github.com/toml-rs/toml)
+- [Rocket](https://github.com/rwf2/Rocket) 
+- [rocket_ws](https://github.com/SergioBenitez/rocket_ws)
+- [rocket_okapi](https://github.com/GREsau/rocket_okapi)
+- [Chrono](https://github.com/chronotope/chrono)
