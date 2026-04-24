@@ -40,16 +40,16 @@ Everything should be preconfigured for hosting on a single machine, through dock
 
 # Structure
 
-## a.) Services
+## Services
 - **gateway** — WebSocket handling
 - **api** — REST API backend
 
-## b.) Library
+## Library
 - **config** — Shared configuration library for Kestrel
 
 ## Running
 
-### 1) With Docker
+### With Docker
 
 > Reccomended for most users.
 
@@ -63,7 +63,7 @@ To run specific services:
 docker compose up --build api
 ```
 
-### 2) Without Docker
+### Without Docker
 
 Set your config path:
 ```bash
