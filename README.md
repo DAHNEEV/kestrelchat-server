@@ -18,6 +18,12 @@
   </a>
 </p>
 
+# About
+
+Kestrel is a modern instant-messaging service written in Rust.
+
+It exists because most chat platforms don’t care, are closed, or simply feel clunky. <!--Some of them also just… suck. Looking at you, Valour.-->
+
 # Getting Started
 <!--If anyone's good at writing Docs and sees this, reach out to me in Kestrel's community please - Stribes-->
 ## Prerequisites
