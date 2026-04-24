@@ -27,7 +27,7 @@ It exists because most chat platforms don’t care, are closed, or simply feel c
 # Contributing
 ## Prerequisites
 
-- Install Rust 1.94+
+- Rust 1.94+
 - Any IDE with Rust support (I recommend Zed, with AI turned off, please.)
 - Docker with Docker Compose (recommended)
 
