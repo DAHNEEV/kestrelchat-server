@@ -41,17 +41,17 @@ Everything should be preconfigured for hosting on a single machine, through dock
 # Structure
 
 ## Services
-- **gateway** — WebSocket handling
-- **api** — REST API backend
+- **gateway** - WebSocket handling
+- **api** - REST API backend
 
 ## Library
-- **config** — Shared configuration library for Kestrel
+- **config** - Shared configuration library for Kestrel
 
 ## Running
 
 ### With Docker
 
-> Reccomended for most users.
+> Recommended for most users.
 
 To run all services:
 ```bash
