@@ -23,6 +23,10 @@ use config::Config as AppConfig;
 use rocket::Config as RocketConfig;
 
 use crate::utils::cors::CorsFairing;
+use utils::errors::{
+    bad_request, default_catcher, forbidden, internal_error, method_not_allowed, not_acceptable,
+    not_found, service_unavailable, too_many_requests, unauthorized, unprocessable_entity,
+};
 
 #[macro_use]
 extern crate rocket;
@@ -49,7 +53,23 @@ async fn rocket() -> _ {
 
     let rocket = rocket::custom(rocket_config)
         .attach(cors)
-        .mount("/swagger", swagger);
+        .mount("/swagger", swagger)
+        .register(
+            "/",
+            catchers![
+                bad_request,
+                unauthorized,
+                forbidden,
+                not_found,
+                method_not_allowed,
+                not_acceptable,
+                unprocessable_entity,
+                too_many_requests,
+                internal_error,
+                service_unavailable,
+                default_catcher,
+            ],
+        );
 
     routes::mount(rocket)
 }
