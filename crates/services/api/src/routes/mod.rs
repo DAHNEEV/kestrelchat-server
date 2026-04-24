@@ -29,7 +29,7 @@ pub fn mount(mut rocket: Rocket<Build>) -> Rocket<Build> {
     // I am not sure why this screams at me about an error, but it compiles??
     // It seems to work as intended, I am going to leave it
     mount_endpoints_and_merged_docs!(rocket, "/".to_owned(), settings,
-        "/meta" => openapi_get_routes_spec![meta::meta]
+        "/" => openapi_get_routes_spec![meta::meta]
     );
 
     rocket
