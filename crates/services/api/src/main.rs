@@ -17,9 +17,12 @@
  */
 
 pub mod routes;
+pub mod utils;
 
 use config::Config as AppConfig;
 use rocket::Config as RocketConfig;
+
+use crate::utils::cors::CorsFairing;
 
 #[macro_use]
 extern crate rocket;
@@ -40,7 +43,13 @@ async fn rocket() -> _ {
             ..Default::default()
         });
 
-    let rocket = rocket::custom(rocket_config).mount("/swagger", swagger);
+    let cors = CorsFairing {
+        config: config.network.cors.clone(),
+    };
+
+    let rocket = rocket::custom(rocket_config)
+        .attach(cors)
+        .mount("/swagger", swagger);
 
     routes::mount(rocket)
 }

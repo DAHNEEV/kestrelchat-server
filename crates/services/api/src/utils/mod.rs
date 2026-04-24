@@ -16,23 +16,4 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-use serde::Deserialize;
-
-#[derive(Debug, Deserialize)]
-pub struct NetworkConfig {
-    pub host: String,
-    pub ports: Ports,
-    pub cors: Cors,
-}
-
-#[derive(Debug, Deserialize, Clone)]
-pub struct Cors {
-    pub allowed_origins: Vec<String>,
-    pub allow_credentials: bool,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct Ports {
-    pub gateway: u16,
-    pub api: u16,
-}
+pub mod cors;

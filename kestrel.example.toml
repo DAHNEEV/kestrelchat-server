@@ -5,3 +5,7 @@ host = "0.0.0.0"
 # I see no reason to allocate more than those 10 ports for my current plans.
 # - Stribes
 ports = { gateway = 5180, api = 5181 }
+
+[network.cors]
+allowed_origins = ["*"]
+allow_credentials = true
