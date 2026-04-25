@@ -46,6 +46,11 @@ async fn rocket() -> _ {
         .await
         .expect("Failed to connect to database");
 
+    database
+        .migrate() //
+        .await
+        .expect("Failed to run database migrations");
+
     let swagger =
         rocket_okapi::swagger_ui::make_swagger_ui(&rocket_okapi::swagger_ui::SwaggerUIConfig {
             url: "/openapi.json".to_owned(),

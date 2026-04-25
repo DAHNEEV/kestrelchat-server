@@ -39,4 +39,11 @@ impl Database {
     pub fn pool(&self) -> &PgPool {
         &self.pool
     }
+
+    pub async fn migrate(&self) -> Result<(), DatabaseError> {
+        sqlx::migrate!("./migrations")
+            .run(&self.pool)
+            .await
+            .map_err(DatabaseError::Migration)
+    }
 }
