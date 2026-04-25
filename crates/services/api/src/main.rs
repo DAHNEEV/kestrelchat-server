@@ -1,5 +1,5 @@
 /*
- * Kestrel - a lightweight real-time messaging service
+ * Kestrel - a modern instant-messaging service written in Rust
  * Copyright (C) 2026 Kestrel Chat
  *
  * This program is free software: you can redistribute it and/or modify
