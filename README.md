@@ -55,9 +55,14 @@ Everything should be preconfigured for hosting on a single machine, through dock
 
 > Recommended for most users.
 
-To run all services:
+To run the main backend (api, gateway, etc.) without development dependencies (e.g. Postgres):
 ```bash
-docker compose up --build
+docker compose --profile prod up --build
+```
+
+To run all development dependencies (e.g. Postgres):
+```bash
+docker compose --profile dev up --build
 ```
 
 To run specific services:
@@ -83,10 +88,14 @@ Any external services (databases, cdns, etc.) must be configured in ``kestrel.to
 
 Kestrel is built on top of the following open-source Rust libraries:
 
-- [Serde](https://github.com/serde-rs/serde)
-- [Serde JSON](https://github.com/serde-rs/json)
-- [TOML](https://github.com/toml-rs/toml)
-- [Rocket](https://github.com/rwf2/Rocket) 
-- [rocket_ws](https://github.com/SergioBenitez/rocket_ws)
-- [rocket_okapi](https://github.com/GREsau/rocket_okapi)
 - [Chrono](https://github.com/chronotope/chrono)
+- [error](https://crates.io/crates/error)
+- [rocket_okapi](https://github.com/GREsau/rocket_okapi)
+- [rocket_ws](https://github.com/SergioBenitez/rocket_ws)
+- [Rocket](https://github.com/rwf2/Rocket)
+- [Serde JSON](https://github.com/serde-rs/json)
+- [Serde](https://github.com/serde-rs/serde)
+- [SQLx](https://github.com/launchbadge/sqlx)
+- [thiserror](https://github.com/dtolnay/thiserror)
+- [Tokio](https://github.com/tokio-rs/tokio)
+- [TOML](https://github.com/toml-rs/toml)

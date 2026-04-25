@@ -9,3 +9,6 @@ ports = { gateway = 5180, api = 5181 }
 [network.cors]
 allowed_origins = ["*"]
 allow_credentials = true
+
+[database]
+postgres = "postgresql://kestrel:kestrel@localhost:5432/kestrel"

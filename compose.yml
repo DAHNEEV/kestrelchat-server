@@ -15,6 +15,9 @@ services:
       - "5180:5180"
 
     restart: unless-stopped
+
+    profiles: ["prod", "dev"]
+
   api:
     build:
       context: .
@@ -29,3 +32,25 @@ services:
       - "5181:5181"
 
     restart: unless-stopped
+
+    profiles: ["prod", "dev"]
+
+  postgres:
+    image: postgres:18
+
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    environment:
+      POSTGRES_USER: kestrel
+      POSTGRES_PASSWORD: kestrel
+      POSTGRES_DB: kestrel
+
+    ports:
+      - "5432:5432"
+
+    restart: unless-stopped
+
+    profiles: ["dev"]
+
+volumes:
+  postgres_data:

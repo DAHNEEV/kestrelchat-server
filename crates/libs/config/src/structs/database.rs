@@ -18,12 +18,7 @@
 
 use serde::Deserialize;
 
-use crate::structs::{database::DatabaseConfig, network::NetworkConfig};
-
 #[derive(Debug, Deserialize)]
-pub struct Config {
-    #[serde(default)]
-    pub is_production: bool,
-    pub network: NetworkConfig,
-    pub database: DatabaseConfig,
+pub struct DatabaseConfig {
+    pub postgres: String,
 }

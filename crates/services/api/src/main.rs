@@ -20,6 +20,7 @@ pub mod routes;
 pub mod utils;
 
 use config::Config as AppConfig;
+use database::connection::Database;
 use rocket::Config as RocketConfig;
 
 use crate::utils::cors::CorsFairing;
@@ -41,6 +42,10 @@ async fn rocket() -> _ {
         ..RocketConfig::default()
     };
 
+    let database = Database::connect(&config.database.postgres)
+        .await
+        .expect("Failed to connect to database");
+
     let swagger =
         rocket_okapi::swagger_ui::make_swagger_ui(&rocket_okapi::swagger_ui::SwaggerUIConfig {
             url: "/openapi.json".to_owned(),
@@ -53,6 +58,7 @@ async fn rocket() -> _ {
 
     let rocket = rocket::custom(rocket_config)
         .attach(cors)
+        .manage(database)
         .mount("/swagger", swagger)
         .register(
             "/",

@@ -17,6 +17,7 @@
  */
 
 pub mod config;
+pub mod database;
 pub mod network;
 
 pub use config::Config;
