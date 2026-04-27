@@ -1,0 +1,12 @@
+# RUSTSEC-2023-0071: Marvin Attack timing sidechannel in the `rsa` crate.
+# No fixed version is available upstream. Triggered transitively through
+# sqlx-macros-core -> sqlx-mysql -> rsa. We only use PostgreSQL and perform
+# no RSA operations; this is an unavoidable compile-time drag-in until a
+# patched `rsa` release or sqlx properly gates the mysql driver behind its feature flag.
+
+[advisories]
+ignore = ["RUSTSEC-2023-0071"]
+
+[target]
+arch = ["x86_64"]
+os = ["linux"] # Noone actually hosts on Windows Server right?

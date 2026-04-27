@@ -90,7 +90,6 @@ Kestrel Backend is built on top of the following open-source Rust libraries:
 
 - [async-trait](https://github.com/dtolnay/async-trait)
 - [chrono](https://github.com/chronotope/chrono)
-- [error](https://crates.io/crates/error)
 - [rocket](https://github.com/rwf2/Rocket)
 - [rocket_okapi](https://github.com/GREsau/rocket_okapi)
 - [rocket_ws](https://github.com/SergioBenitez/rocket_ws)

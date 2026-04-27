@@ -6,7 +6,6 @@ edition = "2024"
 [dependencies]
 async-trait = "0.1.89"
 chrono = "0.4.44"
-error = "0.1.9"
 sqlx = { version = "0.8.6", features = [
     "postgres",
     "runtime-tokio-native-tls",
