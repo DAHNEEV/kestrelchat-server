@@ -30,10 +30,10 @@ pub fn gateway(ws: WebSocket) -> ws::Channel<'static> {
                     Err(_) => break,
                 };
 
-                if let ws::Message::Text(text) = msg {
-                    if let Ok(packet) = serde_json::from_str::<Packet>(&text) {
-                        router::route(packet).await;
-                    }
+                if let ws::Message::Text(text) = msg
+                    && let Ok(packet) = serde_json::from_str::<Packet>(&text)
+                {
+                    router::route(packet).await;
                 }
             }
 
