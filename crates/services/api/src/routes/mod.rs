@@ -18,8 +18,10 @@
 
 pub mod meta;
 
-use okapi::{mount_endpoints_and_merged_docs, openapi_get_routes_spec, settings::OpenApiSettings};
 use rocket::{Build, Rocket};
+use rocket_okapi::{
+    mount_endpoints_and_merged_docs, openapi_get_routes_spec, settings::OpenApiSettings,
+};
 
 pub fn mount(mut rocket: Rocket<Build>) -> Rocket<Build> {
     let settings = OpenApiSettings::default();

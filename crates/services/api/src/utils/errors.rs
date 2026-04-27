@@ -14,12 +14,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-use okapi::OpenApiError;
-use okapi::r#gen::OpenApiGenerator;
-use okapi::okapi::openapi3::{MediaType, RefOr, Response, Responses};
-use okapi::response::OpenApiResponderInner;
 use rocket::serde::json::Json;
 use rocket::{Request, catch, http::Status, response::Responder, response::status::Custom};
+use rocket_okapi::OpenApiError;
+use rocket_okapi::r#gen::OpenApiGenerator;
+use rocket_okapi::okapi::openapi3::{MediaType, RefOr, Response, Responses};
+use rocket_okapi::response::OpenApiResponderInner;
 use serde::Serialize;
 use ulid::Ulid;
 
