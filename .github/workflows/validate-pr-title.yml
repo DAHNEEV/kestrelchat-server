@@ -1,4 +1,4 @@
-name: lint-pr.yml
+name: Lint PR
 
 on:
   pull_request:
