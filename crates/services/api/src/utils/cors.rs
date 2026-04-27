@@ -63,20 +63,20 @@ impl Fairing for CorsFairing {
         let allow_all = self.config.allowed_origins.contains(&"*".to_string());
 
         if self.config.allow_credentials {
-            if let Some(origin) = origin {
-                if allow_all || self.config.allowed_origins.contains(&origin.to_string()) {
-                    res.set_header(Header::new("Access-Control-Allow-Origin", origin));
-                    res.set_header(Header::new("Access-Control-Allow-Credentials", "true"));
-                    res.set_header(Header::new("Vary", "Origin"));
-                }
+            if let Some(origin) = origin
+                && (allow_all || self.config.allowed_origins.contains(&origin.to_string()))
+            {
+                res.set_header(Header::new("Access-Control-Allow-Origin", origin));
+                res.set_header(Header::new("Access-Control-Allow-Credentials", "true"));
+                res.set_header(Header::new("Vary", "Origin"));
             }
         } else {
             if allow_all {
                 res.set_header(Header::new("Access-Control-Allow-Origin", "*"));
-            } else if let Some(origin) = origin {
-                if self.config.allowed_origins.contains(&origin.to_string()) {
-                    res.set_header(Header::new("Access-Control-Allow-Origin", origin));
-                }
+            } else if let Some(origin) = origin
+                && self.config.allowed_origins.contains(&origin.to_string())
+            {
+                res.set_header(Header::new("Access-Control-Allow-Origin", origin));
             }
         }
     }
