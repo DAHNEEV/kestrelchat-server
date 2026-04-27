@@ -31,6 +31,7 @@ use utils::errors::{
 
 #[macro_use]
 extern crate rocket;
+extern crate rocket_okapi;
 
 #[launch]
 async fn rocket() -> _ {
