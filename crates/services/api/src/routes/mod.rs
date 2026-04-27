@@ -16,6 +16,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+pub mod auth;
 pub mod meta;
 
 use rocket::{Build, Rocket};
@@ -29,7 +30,8 @@ pub fn mount(mut rocket: Rocket<Build>) -> Rocket<Build> {
     // I am not sure why this screams at me about an error, but it compiles??
     // It seems to work as intended, I am going to leave it.
     mount_endpoints_and_merged_docs!(rocket, "/".to_owned(), settings,
-        "/" => openapi_get_routes_spec![meta::meta]
+        "/" => openapi_get_routes_spec![meta::meta],
+        "/auth" => auth::routes()
     );
 
     rocket

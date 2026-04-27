@@ -20,8 +20,14 @@ use config::structs::network::Cors;
 use rocket::{
     Request, Response,
     fairing::{Fairing, Info, Kind},
-    http::Header,
+    http::{Header, Method, Status},
+    response::status::NoContent,
 };
+
+#[options("/<_..>")]
+pub fn preflight() -> NoContent {
+    NoContent
+}
 
 pub struct CorsFairing {
     pub config: Cors,
@@ -48,6 +54,11 @@ impl Fairing for CorsFairing {
             "Access-Control-Allow-Headers",
             "Content-Type, Authorization",
         ));
+
+        if req.method() == Method::Options {
+            res.set_header(Header::new("Access-Control-Max-Age", "86400"));
+            res.set_status(Status::NoContent);
+        }
 
         let allow_all = self.config.allowed_origins.contains(&"*".to_string());
 

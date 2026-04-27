@@ -31,8 +31,8 @@ pub enum DatabaseError {
     #[error("record not found")]
     NotFound,
 
-    #[error("unique constraint violation")]
-    UniqueViolation,
+    #[error("unique constraint violation on '{0}'")]
+    UniqueViolation(String),
 
     #[error("foreign key constraint violation")]
     ForeignKeyViolation,
@@ -51,7 +51,10 @@ impl DatabaseError {
     pub fn from_sqlx(err: SqlxError) -> Self {
         if let SqlxError::Database(db_err) = &err {
             match db_err.code().as_deref() {
-                Some("23505") => return Self::UniqueViolation,
+                Some("23505") => {
+                    let constraint = db_err.constraint().unwrap_or("unknown").to_string();
+                    return Self::UniqueViolation(constraint);
+                }
                 Some("23503") => return Self::ForeignKeyViolation,
                 Some("23502") => return Self::NotNullViolation,
                 Some("23514") => return Self::CheckViolation,

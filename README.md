@@ -86,16 +86,19 @@ Any external services (databases, cdns, etc.) must be configured in ``kestrel.to
 
 # External Libraries
 
-Kestrel is built on top of the following open-source Rust libraries:
+Kestrel Backend is built on top of the following open-source Rust libraries:
 
-- [Chrono](https://github.com/chronotope/chrono)
+- [async-trait](https://github.com/dtolnay/async-trait)
+- [chrono](https://github.com/chronotope/chrono)
 - [error](https://crates.io/crates/error)
+- [rocket](https://github.com/rwf2/Rocket)
 - [rocket_okapi](https://github.com/GREsau/rocket_okapi)
 - [rocket_ws](https://github.com/SergioBenitez/rocket_ws)
-- [Rocket](https://github.com/rwf2/Rocket)
-- [Serde JSON](https://github.com/serde-rs/json)
-- [Serde](https://github.com/serde-rs/serde)
-- [SQLx](https://github.com/launchbadge/sqlx)
+- [schemars](https://github.com/GREsau/schemars)
+- [serde](https://github.com/serde-rs/serde)
+- [serde_json](https://github.com/serde-rs/json)
+- [sqlx](https://github.com/launchbadge/sqlx)
 - [thiserror](https://github.com/dtolnay/thiserror)
-- [Tokio](https://github.com/tokio-rs/tokio)
-- [TOML](https://github.com/toml-rs/toml)
+- [tokio](https://github.com/tokio-rs/tokio)
+- [toml](https://github.com/toml-rs/toml)
+- [ulid](https://github.com/ulid/spec)

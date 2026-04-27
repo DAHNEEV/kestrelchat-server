@@ -23,7 +23,7 @@ use config::Config as AppConfig;
 use database::connection::Database;
 use rocket::Config as RocketConfig;
 
-use crate::utils::cors::CorsFairing;
+use crate::utils::cors::{CorsFairing, preflight};
 use utils::errors::{
     bad_request, default_catcher, forbidden, internal_error, method_not_allowed, not_acceptable,
     not_found, service_unavailable, too_many_requests, unauthorized, unprocessable_entity,
@@ -48,7 +48,7 @@ async fn rocket() -> _ {
         .expect("Failed to connect to database");
 
     database
-        .migrate() //
+        .migrate()
         .await
         .expect("Failed to run database migrations");
 
@@ -65,6 +65,8 @@ async fn rocket() -> _ {
     let rocket = rocket::custom(rocket_config)
         .attach(cors)
         .manage(database)
+        .manage(config)
+        .mount("/", routes![preflight])
         .mount("/swagger", swagger)
         .register(
             "/",

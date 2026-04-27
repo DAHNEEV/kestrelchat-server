@@ -14,6 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-pub mod connection;
-pub mod error;
-pub mod models;
+pub mod email;
+pub mod password;
+
+pub enum ValidationError {
+    Email(email::ValidationError),
+    Password(password::ValidationError),
+}

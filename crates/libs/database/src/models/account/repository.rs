@@ -14,6 +14,26 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-pub mod connection;
-pub mod error;
-pub mod models;
+use chrono::NaiveDate;
+
+use crate::models::account::ops::create_account as db_create_account;
+use crate::{
+    connection::Database,
+    error::DatabaseError,
+    models::account::{Account, ops::AccountOps},
+};
+
+pub struct AccountRepository;
+
+#[async_trait::async_trait]
+impl AccountOps for AccountRepository {
+    async fn create_account(
+        &self,
+        db: &Database,
+        email: &str,
+        password_hash: &str,
+        birthday: NaiveDate,
+    ) -> Result<Account, DatabaseError> {
+        db_create_account(db, email, password_hash, birthday).await
+    }
+}

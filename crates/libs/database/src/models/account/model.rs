@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-pub mod connection;
-pub mod error;
-pub mod models;
+use chrono::{DateTime, Utc};
+use sqlx::FromRow;
+
+#[derive(Debug, Clone, FromRow)]
+pub struct Account {
+    pub id: String,
+    pub email: String,
+    pub password: String,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}

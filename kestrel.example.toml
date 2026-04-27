@@ -11,4 +11,4 @@ allowed_origins = ["*"]
 allow_credentials = true
 
 [database]
-postgres = "postgresql://kestrel:kestrel@localhost:5432/kestrel"
+postgres = "postgresql://kestrel:kestrel@postgres:5432/kestrel"

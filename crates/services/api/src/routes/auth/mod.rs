@@ -14,6 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-pub mod connection;
-pub mod error;
-pub mod models;
+use rocket::Route;
+use rocket_okapi::{okapi::openapi3::OpenApi, openapi_get_routes_spec};
+
+mod register;
+
+pub fn routes() -> (Vec<Route>, OpenApi) {
+    openapi_get_routes_spec![register::register]
+}

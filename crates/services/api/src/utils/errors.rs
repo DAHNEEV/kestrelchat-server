@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+use common::utils::validation::{ValidationError, email, password};
+use database::error::DatabaseError;
 use rocket::serde::json::Json;
 use rocket::{Request, catch, http::Status, response::Responder, response::status::Custom};
 use rocket_okapi::OpenApiError;
@@ -85,6 +87,54 @@ impl AppError {
     }
 }
 
+impl From<DatabaseError> for AppError {
+    fn from(err: DatabaseError) -> Self {
+        match err {
+            DatabaseError::UniqueViolation(_) => AppError::conflict("UNIQUE_VIOLATION"),
+            DatabaseError::NotFound => AppError::not_found("NOT_FOUND"),
+            DatabaseError::ForeignKeyViolation => AppError::bad_request("FOREIGN_KEY_VIOLATION"),
+            DatabaseError::NotNullViolation => AppError::bad_request("NOT_NULL_VIOLATION"),
+            DatabaseError::CheckViolation => AppError::bad_request("CHECK_VIOLATION"),
+            _ => AppError::internal_error("DATABASE_ERROR"),
+        }
+    }
+}
+
+impl From<ValidationError> for AppError {
+    fn from(err: ValidationError) -> Self {
+        match err {
+            ValidationError::Email(e) => match e {
+                email::ValidationError::Empty => AppError::bad_request("EMAIL_EMPTY"),
+                email::ValidationError::TooLong => AppError::bad_request("EMAIL_TOO_LONG"),
+                email::ValidationError::MissingAt => AppError::bad_request("EMAIL_MISSING_AT"),
+                email::ValidationError::InvalidStructure => {
+                    AppError::bad_request("EMAIL_INVALID_STRUCTURE")
+                }
+                email::ValidationError::InvalidDomain => {
+                    AppError::bad_request("EMAIL_INVALID_DOMAIN")
+                }
+            },
+            ValidationError::Password(e) => match e {
+                password::ValidationError::Empty => AppError::bad_request("PASSWORD_EMPTY"),
+                password::ValidationError::TooShort => AppError::bad_request("PASSWORD_TOO_SHORT"),
+                password::ValidationError::TooLong => AppError::bad_request("PASSWORD_TOO_LONG"),
+                password::ValidationError::MissingUpper => {
+                    AppError::bad_request("PASSWORD_MISSING_UPPER")
+                }
+                password::ValidationError::MissingLower => {
+                    AppError::bad_request("PASSWORD_MISSING_LOWER")
+                }
+                password::ValidationError::MissingDigit => {
+                    AppError::bad_request("PASSWORD_MISSING_DIGIT")
+                }
+                password::ValidationError::MissingSpecial => {
+                    AppError::bad_request("PASSWORD_MISSING_SPECIAL")
+                }
+            },
+        }
+    }
+}
+
 fn make_response(
     code: &str,
     status: Status,
@@ -148,7 +198,41 @@ macro_rules! make_catcher {
 make_catcher!(bad_request, 400, Status::BadRequest, "BAD_REQUEST");
 make_catcher!(unauthorized, 401, Status::Unauthorized, "UNAUTHORIZED");
 make_catcher!(forbidden, 403, Status::Forbidden, "FORBIDDEN");
-make_catcher!(not_found, 404, Status::NotFound, "NOT_FOUND");
+fn is_wildcard_path(pattern: &str) -> bool {
+    let seg = pattern.trim_start_matches('/');
+    seg.starts_with('<') && seg.ends_with("..>")
+}
+
+fn path_matches(pattern: &str, path: &str) -> bool {
+    if is_wildcard_path(pattern) {
+        return true;
+    }
+    let pat_parts: Vec<&str> = pattern.trim_start_matches('/').split('/').collect();
+    let path_parts: Vec<&str> = path.trim_start_matches('/').split('/').collect();
+    if pat_parts.len() != path_parts.len() {
+        return false;
+    }
+    pat_parts
+        .iter()
+        .zip(path_parts.iter())
+        .all(|(p, s)| (p.starts_with('<') && p.ends_with('>')) || *p == *s)
+}
+
+#[catch(404)]
+pub fn not_found(req: &Request<'_>) -> Custom<Json<ErrorResponse>> {
+    let req_path = req.uri().path();
+    let is_method_mismatch = req.rocket().routes().any(|route| {
+        route.method != req.method()
+            && !is_wildcard_path(route.uri.path())
+            && path_matches(route.uri.path(), req_path.as_str())
+    });
+
+    if is_method_mismatch {
+        make_response("METHOD_NOT_ALLOWED", Status::MethodNotAllowed, None, req)
+    } else {
+        make_response("NOT_FOUND", Status::NotFound, None, req)
+    }
+}
 make_catcher!(
     method_not_allowed,
     405,
