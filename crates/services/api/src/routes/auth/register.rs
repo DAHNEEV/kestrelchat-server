@@ -15,7 +15,10 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 use chrono::NaiveDate;
-use common::utils::validation::{ValidationError, email, password};
+use common::utils::{
+    normalize,
+    validation::{ValidationError, email, password},
+};
 use config::Config;
 use database::{
     connection::Database,
@@ -48,9 +51,11 @@ pub async fn register(
     _config: &State<Config>,
     req: Json<RegisterRequest>,
 ) -> Result<Json<RegisterResponse>, AppError> {
-    // TODO: CHECK AGE + NORMALIZE EMAIL
+    // TODO: CHECK AGE
 
-    email::validate(&req.email)
+    let normalized_email = normalize::identity(&req.email);
+
+    email::validate(&normalized_email)
         .await
         .map_err(ValidationError::Email)?;
 
@@ -63,7 +68,7 @@ pub async fn register(
         .map_err(|_| AppError::internal_error("HASH_FAILED"))?;
 
     let account = AccountRepository
-        .create_account(db, &req.email, &hashed_password, req.birthday)
+        .create_account(db, &normalized_email, &hashed_password, req.birthday)
         .await
         .map_err(|e| match e {
             DatabaseError::UniqueViolation(ref c) if c == "accounts_email_key" => {

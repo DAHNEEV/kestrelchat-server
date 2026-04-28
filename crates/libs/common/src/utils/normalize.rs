@@ -14,6 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-pub mod hasher;
-pub mod normalize;
-pub mod validation;
+pub fn identity(input: &str) -> String {
+    input.trim().to_lowercase()
+}
+
+pub fn display(input: &str) -> String {
+    input.trim().to_string()
+}
