@@ -23,7 +23,7 @@ pub enum ValidationError {
     InvalidDomain,
 }
 
-pub async fn validate(email: &str) -> Result<(), ValidationError> {
+pub async fn validate(email: &str, production: bool) -> Result<(), ValidationError> {
     if email.is_empty() || email.chars().all(|c| c.is_whitespace()) {
         return Err(ValidationError::Empty);
     }
@@ -45,7 +45,17 @@ pub async fn validate(email: &str) -> Result<(), ValidationError> {
     }
 
     if !domain.contains('.') {
-        return Err(ValidationError::InvalidDomain);
+        let is_localhost = domain == "localhost";
+
+        if is_localhost {
+            if production {
+                return Err(ValidationError::InvalidDomain);
+            }
+        } else {
+            if !domain.contains('.') {
+                return Err(ValidationError::InvalidDomain);
+            }
+        }
     }
 
     if domain.starts_with('.') || domain.ends_with('.') {

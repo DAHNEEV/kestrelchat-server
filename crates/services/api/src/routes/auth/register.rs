@@ -55,7 +55,7 @@ pub async fn register(
 
     let normalized_email = normalize::identity(&req.email);
 
-    email::validate(&normalized_email)
+    email::validate(&normalized_email, _config.is_production)
         .await
         .map_err(ValidationError::Email)?;
 
