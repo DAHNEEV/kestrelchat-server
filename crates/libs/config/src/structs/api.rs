@@ -16,9 +16,14 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-pub mod api;
-pub mod config;
-pub mod database;
-pub mod network;
+use serde::Deserialize;
 
-pub use config::Config;
+#[derive(Debug, Deserialize)]
+pub struct ApiConfig {
+    pub registration: RegistrationConfig,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct RegistrationConfig {
+    pub minimum_age: u32,
+}

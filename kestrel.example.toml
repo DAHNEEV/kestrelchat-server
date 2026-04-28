@@ -14,3 +14,6 @@ allow_credentials = true
 
 [database]
 postgres = "postgresql://kestrel:kestrel@postgres:5432/kestrel"
+
+[api.registration]
+minimum_age = 16

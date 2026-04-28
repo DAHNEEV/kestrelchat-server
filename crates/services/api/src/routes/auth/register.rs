@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-use chrono::NaiveDate;
+use chrono::{Datelike, NaiveDate, Utc};
 use common::utils::{
     normalize,
     validation::{ValidationError, email, password},
@@ -35,7 +35,7 @@ use crate::utils::errors::AppError;
 pub struct RegisterRequest {
     email: String,
     password: String,
-    birthday: NaiveDate,
+    birthday: Option<NaiveDate>,
 }
 
 #[derive(Serialize, schemars::JsonSchema)]
@@ -48,14 +48,12 @@ pub struct RegisterResponse {
 #[post("/register", data = "<req>")]
 pub async fn register(
     db: &State<Database>,
-    _config: &State<Config>,
+    config: &State<Config>,
     req: Json<RegisterRequest>,
 ) -> Result<Json<RegisterResponse>, AppError> {
-    // TODO: CHECK AGE
-
     let normalized_email = normalize::identity(&req.email);
 
-    email::validate(&normalized_email, _config.is_production)
+    email::validate(&normalized_email, config.is_production)
         .await
         .map_err(ValidationError::Email)?;
 
@@ -63,12 +61,19 @@ pub async fn register(
         .await
         .map_err(ValidationError::Password)?;
 
+    let birthday = req
+        .birthday
+        .ok_or(AppError::bad_request("BIRTHDAY_EMPTY"))?;
+    if !is_old_enough(birthday, config.api.registration.minimum_age as i32) {
+        return Err(AppError::bad_request("AGE_TOO_YOUNG"));
+    }
+
     let hashed_password = common::utils::hasher::hash(req.password.as_bytes())
         .await
         .map_err(|_| AppError::internal_error("HASH_FAILED"))?;
 
     let account = AccountRepository
-        .create_account(db, &normalized_email, &hashed_password, req.birthday)
+        .create_account(db, &normalized_email, &hashed_password, birthday)
         .await
         .map_err(|e| match e {
             DatabaseError::UniqueViolation(ref c) if c == "accounts_email_key" => {
@@ -83,4 +88,18 @@ pub async fn register(
         id: account.id,
         email: account.email,
     }))
+}
+
+fn is_old_enough(birthday: NaiveDate, min_age: i32) -> bool {
+    let today = Utc::now().date_naive();
+
+    let age = today.year()
+        - birthday.year()
+        - if today.ordinal() < birthday.ordinal() {
+            1
+        } else {
+            0
+        };
+
+    age >= min_age
 }

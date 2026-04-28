@@ -18,7 +18,7 @@
 
 use serde::Deserialize;
 
-use crate::structs::{database::DatabaseConfig, network::NetworkConfig};
+use crate::structs::{api::ApiConfig, database::DatabaseConfig, network::NetworkConfig};
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
@@ -26,4 +26,5 @@ pub struct Config {
     pub is_production: bool,
     pub network: NetworkConfig,
     pub database: DatabaseConfig,
+    pub api: ApiConfig,
 }

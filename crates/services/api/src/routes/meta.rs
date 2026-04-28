@@ -16,6 +16,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+use config::Config;
 use rocket::serde::json::Json;
 use rocket_okapi::okapi::schemars;
 use rocket_okapi::openapi;
@@ -24,11 +25,29 @@ use serde::Serialize;
 
 #[derive(Serialize, JsonSchema)]
 pub struct Meta {
-    pub wip: bool,
+    pub kestrel: String,
+    pub features: FeaturesMeta,
+}
+
+#[derive(Serialize, JsonSchema)]
+pub struct FeaturesMeta {
+    pub registration: RegistrationMeta,
+}
+
+#[derive(Serialize, JsonSchema)]
+pub struct RegistrationMeta {
+    pub minimum_age: u32,
 }
 
 #[openapi(tag = "Core")]
 #[get("/")]
-pub fn meta() -> Json<Meta> {
-    Json(Meta { wip: true })
+pub fn meta(config: &rocket::State<Config>) -> Json<Meta> {
+    Json(Meta {
+        kestrel: env!("CARGO_PKG_VERSION").to_string(),
+        features: FeaturesMeta {
+            registration: RegistrationMeta {
+                minimum_age: config.api.registration.minimum_age,
+            },
+        },
+    })
 }
