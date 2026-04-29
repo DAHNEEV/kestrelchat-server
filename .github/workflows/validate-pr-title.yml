@@ -10,6 +10,7 @@ on:
 
 permissions:
   pull-requests: write
+  contents: read
 
 jobs:
   main:
@@ -20,7 +21,7 @@ jobs:
       - uses: amannn/action-semantic-pull-request@v6
         id: lint_pr_title
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           types: |
             feat
