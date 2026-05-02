@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://github.com/kestrelchat/server/blob/prod/assets/README/banner.png?raw=true" alt="Kestrel Banner">
+    <img src="https://raw.githubusercontent.com/kestrelchat/.github/refs/heads/main/assets/banner.png" alt="Kestrel Banner">
 </p>
 <p align="center">
   <img src="https://img.shields.io/badge/Rust-1.94%2B-6e6ade?style=for-the-badge&logo=rust&logoColor=white" />
@@ -20,11 +20,11 @@
 
 # About
 
-Kestrel is a modern instant-messaging service written in Rust.
+Kestrel is a free, open-source modern instant-messaging platform.
+
+It is designed to be self-hostable, extensible, and lightweight.
 
 This repository contains only the backend implementation of the system.
-
-It exists because most chat platforms don’t care, are closed, or simply feel clunky. <!--Some of them also just… suck. Looking at you, Valour.-->
 
 # Contributing
 ## Prerequisites
