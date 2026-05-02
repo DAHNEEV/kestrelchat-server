@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: crates/services/gateway/Dockerfile
+      args:
+        BUILD_MODE: ${BUILD_MODE:-debug}
 
     volumes:
       - ./kestrel.toml:/var/kestrel/conf.toml:ro
@@ -22,6 +24,8 @@ services:
     build:
       context: .
       dockerfile: crates/services/api/Dockerfile
+      args:
+        BUILD_MODE: ${BUILD_MODE:-debug}
 
     volumes:
       - ./kestrel.toml:/var/kestrel/conf.toml:ro

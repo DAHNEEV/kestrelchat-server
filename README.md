@@ -57,18 +57,23 @@ Everything should be preconfigured for hosting on a single machine, through dock
 
 To run the main backend (api, gateway, etc.) without development dependencies (e.g. Postgres):
 ```bash
-docker compose --profile prod up --build
+BUILD_MODE=release docker compose --profile prod up --build --build-arg BUILD_MODE=release
 ```
 
 To run all development dependencies (e.g. Postgres):
 ```bash
-docker compose --profile dev up --build
+BUILD_MODE=debug docker compose --profile dev up --build
 ```
 
 To run specific services:
 ```bash
-docker compose up --build api
+BUILD_MODE=debug docker compose up --build api --build-arg BUILD_MODE=debug
 ```
+
+#### Build Mode
+``BUILD_MODE`` controls whether Rust is compiled in debug (fast, unoptimized) or release (optimized for production) mode inside Docker images.
+
+Using ``BUILD_MODE=debug`` is recommended during development.
 
 ### Without Docker
 
