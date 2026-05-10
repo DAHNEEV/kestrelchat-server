@@ -16,7 +16,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-use config::Config;
+use kestrel_config::Config;
 use rocket::serde::json::Json;
 use rocket_okapi::okapi::schemars;
 use rocket_okapi::openapi;
@@ -43,7 +43,7 @@ pub struct RegistrationMeta {
 #[get("/")]
 pub fn meta(config: &rocket::State<Config>) -> Json<Meta> {
     Json(Meta {
-        kestrel: env!("CARGO_PKG_VERSION").to_string(),
+        kestrel: env!("CARGO_PKG_VERSION").into(),
         features: FeaturesMeta {
             registration: RegistrationMeta {
                 minimum_age: config.api.registration.minimum_age,

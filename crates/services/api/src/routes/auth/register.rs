@@ -15,18 +15,15 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 use chrono::{Datelike, NaiveDate, Utc};
-use common::utils::{
-    normalize,
-    validation::{ValidationError, email, password},
+use kestrel_common::utils::{
+    hasher, normalize,
+    validation::{ValidationError, email, password, username},
 };
-use config::Config;
-use database::{
+use kestrel_config::Config;
+use kestrel_postgres::{
     connection::Database,
     error::DatabaseError,
-    models::{
-        account::{AccountOps, AccountRepository},
-        user::{UserOps, UserRepository},
-    },
+    operations::{account::create_account, user::create_user},
 };
 use rocket::{State, serde::json::Json};
 use rocket_okapi::{okapi::schemars, openapi};
@@ -51,11 +48,12 @@ pub struct RegisterResponse {
 #[openapi(tag = "Authentication")]
 #[post("/register", data = "<req>")]
 pub async fn register(
-    db: &State<Database>,
+    postgres: &State<Database>,
     config: &State<Config>,
     req: Json<RegisterRequest>,
 ) -> Result<Json<RegisterResponse>, AppError> {
     let normalized_email = normalize::identity(&req.email);
+    let normalized_username = normalize::identity(&req.username);
 
     email::validate(&normalized_email, config.is_production)
         .await
@@ -65,6 +63,10 @@ pub async fn register(
         .await
         .map_err(ValidationError::Password)?;
 
+    username::validate(&normalized_username)
+        .await
+        .map_err(ValidationError::Username)?;
+
     let birthday = req
         .birthday
         .ok_or(AppError::bad_request("BIRTHDAY_EMPTY"))?;
@@ -72,12 +74,11 @@ pub async fn register(
         return Err(AppError::bad_request("AGE_TOO_YOUNG"));
     }
 
-    let hashed_password = common::utils::hasher::hash(req.password.as_bytes())
+    let hashed_password = hasher::hash(req.password.as_bytes())
         .await
         .map_err(|_| AppError::internal_error("HASH_FAILED"))?;
 
-    let account = AccountRepository
-        .create_account(db, &normalized_email, &hashed_password, birthday)
+    let account = create_account(postgres, &normalized_email, &hashed_password, birthday)
         .await
         .map_err(|e| match e {
             DatabaseError::UniqueViolation(ref c) if c == "accounts_email_key" => {
@@ -86,8 +87,7 @@ pub async fn register(
             other => AppError::from(other),
         })?;
 
-    let _user = UserRepository
-        .create_user(db, account.id.clone(), req.username.as_str())
+    let _user = create_user(postgres, account.id.clone(), &normalized_username)
         .await
         .map_err(|e| match e {
             DatabaseError::UniqueViolation(ref c) if c == "user_unique_tag" => {

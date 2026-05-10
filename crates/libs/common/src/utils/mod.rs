@@ -14,6 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+pub mod base32;
+pub mod geoip;
 pub mod hasher;
 pub mod normalize;
+pub mod user_agent;
 pub mod validation;

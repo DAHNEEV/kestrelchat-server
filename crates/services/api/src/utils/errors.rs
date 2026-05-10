@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-use common::utils::validation::{ValidationError, email, password};
-use database::error::DatabaseError;
+use kestrel_common::utils::validation::{ValidationError, email, password, username};
+use kestrel_postgres::error::DatabaseError;
 use rocket::serde::json::Json;
 use rocket::{Request, catch, http::Status, response::Responder, response::status::Custom};
 use rocket_okapi::OpenApiError;
@@ -114,6 +114,7 @@ impl From<ValidationError> for AppError {
                     AppError::bad_request("EMAIL_INVALID_DOMAIN")
                 }
             },
+
             ValidationError::Password(e) => match e {
                 password::ValidationError::Empty => AppError::bad_request("PASSWORD_EMPTY"),
                 password::ValidationError::TooShort => AppError::bad_request("PASSWORD_TOO_SHORT"),
@@ -131,6 +132,24 @@ impl From<ValidationError> for AppError {
                     AppError::bad_request("PASSWORD_MISSING_SPECIAL")
                 }
             },
+
+            ValidationError::Username(e) => match e {
+                username::ValidationError::Empty => AppError::bad_request("USERNAME_EMPTY"),
+                username::ValidationError::TooShort => AppError::bad_request("USERNAME_TOO_SHORT"),
+                username::ValidationError::TooLong => AppError::bad_request("USERNAME_TOO_LONG"),
+                username::ValidationError::InvalidCharacters => {
+                    AppError::bad_request("USERNAME_INVALID_CHARACTERS")
+                }
+                username::ValidationError::StartsWithInvalidChar => {
+                    AppError::bad_request("USERNAME_INVALID_START")
+                }
+                username::ValidationError::EndsWithInvalidChar => {
+                    AppError::bad_request("USERNAME_INVALID_END")
+                }
+                username::ValidationError::ConsecutiveSeparators => {
+                    AppError::bad_request("USERNAME_CONSECUTIVE_SEPARATORS")
+                }
+            },
         }
     }
 }
@@ -141,12 +160,12 @@ fn make_response(
     message: Option<&str>,
     _req: &Request<'_>,
 ) -> Custom<Json<ErrorResponse>> {
-    let request_id = Ulid::new().to_string();
+    let request_id = Ulid::new().into();
     let body = ErrorResponse {
         error: ErrorObject {
-            code: code.to_string(),
+            code: code.into(),
             status: status.code,
-            message: message.map(|s| s.to_string()),
+            message: message.map(|s| s.into()),
         },
         request_id,
     };
@@ -163,9 +182,8 @@ impl OpenApiResponderInner for AppError {
     fn responses(_gen: &mut OpenApiGenerator) -> Result<Responses, OpenApiError> {
         let mut responses = Responses::default();
         let error_schema = RefOr::Object(Response {
-            description: "Error".to_string(),
-            content: std::iter::once(("application/json".to_string(), MediaType::default()))
-                .collect(),
+            description: "Error".into(),
+            content: std::iter::once(("application/json".into(), MediaType::default())).collect(),
             ..Default::default()
         });
 
