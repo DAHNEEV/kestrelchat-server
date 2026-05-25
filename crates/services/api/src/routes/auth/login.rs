@@ -14,7 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-use kestrel_common::utils::{geoip::GeoIpClient, hasher, normalize, user_agent::parse_user_agent};
+use kestrel_common::{
+    hcaptcha::handler::{HCaptchaForm, handle_form},
+    utils::{geoip::GeoIpClient, hasher, normalize, user_agent::parse_user_agent},
+};
+use kestrel_config::Config;
 use kestrel_postgres::{
     connection::Database,
     error::DatabaseError,
@@ -36,6 +40,7 @@ use crate::utils::{errors::AppError, request_context::RequestContext};
 pub struct LoginRequest {
     email: String,
     password: String,
+    token: String,
 }
 
 #[derive(Serialize, schemars::JsonSchema)]
@@ -50,9 +55,15 @@ pub async fn login(
     postgres: &State<Database>,
     redis: &State<Redis>,
     geoip: &State<GeoIpClient>,
+    config: &State<Config>,
     ctx: RequestContext,
     req: Json<LoginRequest>,
 ) -> Result<Json<LoginResponse>, AppError> {
+    match handle_form(HCaptchaForm { token: &req.token }, &config.hcaptcha.secret).await {
+        Ok(_) => (),
+        Err(_) => return Err(AppError::unauthorized("FAILED_CAPTCHA")),
+    };
+
     let normalized_email = normalize::identity(&req.email);
 
     let account = match get_account_by_email(postgres, &normalized_email).await {
