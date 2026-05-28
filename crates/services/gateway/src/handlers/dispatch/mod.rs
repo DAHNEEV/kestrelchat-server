@@ -1,21 +1,3 @@
-/*
- * Kestrel - a modern instant-messaging service written in Rust
- * Copyright (C) 2026 Kestrel Chat
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
- */
-
 use serde_json::Value;
 
 use crate::protocol::dispatch::DispatchEvent;
@@ -23,13 +5,13 @@ use crate::protocol::dispatch::DispatchEvent;
 pub mod test;
 
 pub async fn handle(t: String, d: Value) {
-    match DispatchEvent::from_str(&t) {
-        DispatchEvent::Test => {
-            test::handle(d).await;
-        }
-
-        DispatchEvent::Unknown(name) => {
-            println!("unknown event: {}", name);
-        }
+  match DispatchEvent::from_str(&t) {
+    DispatchEvent::Test => {
+      test::handle(d).await;
     }
+
+    DispatchEvent::Unknown(name) => {
+      println!("unknown event: {}", name);
+    }
+  }
 }
