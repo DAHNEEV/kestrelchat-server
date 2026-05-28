@@ -31,3 +31,22 @@ pub struct RedisSession {
     pub session_id: String,
     pub account_id: String,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub enum PendingMfaScope {
+    Setup,
+    Login,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum PendingMfaKind {
+    Totp,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PendingMfa {
+    pub scope: PendingMfaScope,
+    pub kind: PendingMfaKind,
+    pub account_id: String,
+    pub protected_payload: String,
+}

@@ -1,28 +1,21 @@
-use chrono::Utc;
 use sqlx::{PgExecutor, query};
 
 use crate::error::DatabaseError;
 
-pub async fn change_password(
+pub async fn set_totp_secret(
     db: impl PgExecutor<'_>,
-    id: String,
-    password: &str,
+    account_id: &str,
+    totp_secret: Option<&str>,
 ) -> Result<(), DatabaseError> {
-    let updated_at = Utc::now();
-
     query(
         r#"
         UPDATE accounts
-        SET
-            password = $1,
-            updated_at = $2
-        WHERE
-            id = $3
+        SET totp_secret = $2
+        WHERE id = $1
         "#,
     )
-    .bind(password)
-    .bind(updated_at)
-    .bind(id)
+    .bind(account_id)
+    .bind(totp_secret)
     .execute(db)
     .await
     .map_err(DatabaseError::from_sqlx)?;
