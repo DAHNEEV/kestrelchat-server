@@ -33,11 +33,11 @@ async fn setup_totp_for(
 
   let temp_token = totp_body["temp_token"].as_str().unwrap();
   client
-        .post("/auth/mfa/totp/confirm")
-        .header(bearer_auth(&session.auth_token))
-        .json(&json!({ "temp_token": temp_token, "password": user.password, "code": code }))
-        .dispatch()
-        .await;
+    .post("/auth/mfa/totp/confirm")
+    .header(bearer_auth(&session.auth_token))
+    .json(&json!({ "temp_token": temp_token, "password": user.password, "code": code }))
+    .dispatch()
+    .await;
 
   totp
 }
@@ -48,9 +48,9 @@ async fn initiate_login_mfa(
   user: &UserCredentials,
 ) -> String {
   let req_body = json!({
-      "email": user.email,
-      "password": user.password,
-      "token": "placeholder"
+    "email": user.email,
+    "password": user.password,
+    "token": "placeholder"
   });
 
   let response = client
@@ -81,8 +81,8 @@ async fn complete_login_mfa(
   code: &str,
 ) -> TokenPair {
   let mfa_body = json!({
-      "temp_token": temp_token,
-      "code": code
+    "temp_token": temp_token,
+    "code": code
   });
 
   let mfa_response = client
@@ -110,7 +110,7 @@ async fn complete_login_mfa(
 
 #[rocket::async_test]
 async fn mfa_login_flow() {
-  run_with_containers(async |client| {
+  run_with_containers(async |_, client| {
     // 1. Create a user and enroll them into TOTP
     let user = register_test_users(&client, 1).await.pop().unwrap();
     let totp = setup_totp_for(&client, &user).await;
@@ -129,7 +129,7 @@ async fn mfa_login_flow() {
 
 #[rocket::async_test]
 async fn disable_totp() {
-  run_with_containers(async |client| {
+  run_with_containers(async |_, client| {
     // 1. Register user and enable TOTP
     let user = register_test_users(&client, 1).await.pop().unwrap();
     let totp = setup_totp_for(&client, &user).await;
@@ -157,7 +157,7 @@ async fn disable_totp() {
 
 #[rocket::async_test]
 async fn password_change_reencrypts_secret() {
-  run_with_containers(async |client| {
+  run_with_containers(async |_, client| {
     // 1. Create user and enroll them into TOTP
     let mut user = register_test_users(&client, 1).await.pop().unwrap();
     let totp = setup_totp_for(&client, &user).await;
@@ -165,9 +165,9 @@ async fn password_change_reencrypts_secret() {
     // 2. Execute password change request
     let new_password = "NewSecurePassword123!".to_string();
     let change_pwd_body = json!({
-        "email": user.email,
-        "old_password": user.password,
-        "new_password": new_password
+      "email": user.email,
+      "old_password": user.password,
+      "new_password": new_password
     });
 
     let change_res = client
