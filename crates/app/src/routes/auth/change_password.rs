@@ -21,12 +21,15 @@ use kestrel_redis::{
 use rocket::{State, serde::json::Json};
 use rocket_okapi::{okapi::schemars, openapi};
 use serde::Deserialize;
-use zeroize::{Zeroize, ZeroizeOnDrop};
+use zeroize::{Zeroize, ZeroizeOnDrop, Zeroizing};
 
-use crate::utils::{
-  auth_context::AuthContext,
-  errors::AppError,
-  totp_secret::{decrypt_totp_secret, encrypt_totp_secret},
+use crate::{
+  guards::rate_limit::WithinRateLimit,
+  utils::{
+    auth_context::AuthContext,
+    errors::AppError,
+    totp_secret::{decrypt_totp_secret, encrypt_totp_secret},
+  },
 };
 
 #[derive(Deserialize, Zeroize, ZeroizeOnDrop, schemars::JsonSchema)]
@@ -38,6 +41,7 @@ pub struct ChangePasswordRequest {
 #[openapi(tag = "Authentication")]
 #[post("/password/change", data = "<req>")]
 pub async fn change_password(
+  _within_rate_limit: WithinRateLimit,
   postgres: &State<Database>,
   redis: &State<Redis>,
   auth_ctx: AuthContext,
@@ -63,9 +67,10 @@ pub async fn change_password(
     .await
     .map_err(ValidationError::Password)?;
 
-  let hashed_password = hasher::password_hash(req.new_password.as_bytes())
-    .await
-    .map_err(|_| AppError::internal_error("HASH_FAILED"))?;
+  let hashed_password =
+    hasher::password_hash(Zeroizing::new(req.new_password.as_bytes().to_vec()))
+      .await
+      .map_err(|_| AppError::internal_error("HASH_FAILED"))?;
 
   let mut tx = postgres
     .pool()

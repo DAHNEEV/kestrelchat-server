@@ -1,14 +1,16 @@
 use std::sync::Arc;
 
-use rocket::{http::StatusClass, local::asynchronous::Client};
+use rocket::http::StatusClass;
 use serde_json::{Value, json};
 
 mod common;
 
 use common::{bearer_auth, login, register_test_users, run_with_containers};
 
+use crate::common::TestClient;
+
 /// Fetches the authenticated user's profile to extract their internal ID.
-async fn get_user_id(client: &Arc<Client>, auth_token: &str) -> String {
+async fn get_user_id(client: &Arc<TestClient>, auth_token: &str) -> String {
   let res = client
     .get("/users/@me")
     .header(bearer_auth(auth_token))
@@ -28,14 +30,15 @@ async fn get_user_id(client: &Arc<Client>, auth_token: &str) -> String {
 #[rocket::async_test]
 async fn send_friend_request() {
   run_with_containers(async |_, client| {
-    let users = register_test_users(&client, 2).await;
+    let users = register_test_users(&client, 2).await.unwrap();
     let session_a = login(&client, &users[0]).await;
     let session_b = login(&client, &users[1]).await;
 
     let user_b_id = get_user_id(&client, &session_b.auth_token).await;
 
+    let url = format!("/users/@me/relationships/{}", user_b_id);
     let res = client
-      .post(format!("/users/@me/relationships/{}", user_b_id))
+      .post(&url)
       .header(bearer_auth(&session_a.auth_token))
       .json(&json!({ "action": "friend" }))
       .dispatch()
@@ -54,13 +57,18 @@ async fn send_friend_request() {
 #[rocket::async_test]
 async fn cannot_send_request_to_self() {
   run_with_containers(async |_, client| {
-    let user = register_test_users(&client, 1).await.pop().unwrap();
+    let user = register_test_users(&client, 1)
+      .await
+      .unwrap()
+      .pop()
+      .unwrap();
     let session = login(&client, &user).await;
 
     let user_id = get_user_id(&client, &session.auth_token).await;
 
+    let url = format!("/users/@me/relationships/{}", user_id);
     let res = client
-      .post(format!("/users/@me/relationships/{}", user_id))
+      .post(&url)
       .header(bearer_auth(&session.auth_token))
       .json(&json!({ "action": "friend" }))
       .dispatch()
@@ -74,22 +82,24 @@ async fn cannot_send_request_to_self() {
 #[rocket::async_test]
 async fn duplicate_friend_request_conflict() {
   run_with_containers(async |_, client| {
-    let users = register_test_users(&client, 2).await;
+    let users = register_test_users(&client, 2).await.unwrap();
     let session_a = login(&client, &users[0]).await;
     let session_b = login(&client, &users[1]).await;
 
     let user_b_id = get_user_id(&client, &session_b.auth_token).await;
 
+    let url = format!("/users/@me/relationships/{}", user_b_id);
     let first_res = client
-      .post(format!("/users/@me/relationships/{}", user_b_id))
+      .post(&url)
       .header(bearer_auth(&session_a.auth_token))
       .json(&json!({ "action": "friend" }))
       .dispatch()
       .await;
     assert_eq!(first_res.status().class(), StatusClass::Success);
 
+    let url = format!("/users/@me/relationships/{}", user_b_id);
     let duplicate_res = client
-      .post(format!("/users/@me/relationships/{}", user_b_id))
+      .post(&url)
       .header(bearer_auth(&session_a.auth_token))
       .json(&json!({ "action": "friend" }))
       .dispatch()
@@ -103,23 +113,25 @@ async fn duplicate_friend_request_conflict() {
 #[rocket::async_test]
 async fn accept_friend_request() {
   run_with_containers(async |_, client| {
-    let users = register_test_users(&client, 2).await;
+    let users = register_test_users(&client, 2).await.unwrap();
     let session_a = login(&client, &users[0]).await;
     let session_b = login(&client, &users[1]).await;
 
     let user_a_id = get_user_id(&client, &session_a.auth_token).await;
     let user_b_id = get_user_id(&client, &session_b.auth_token).await;
 
+    let url = format!("/users/@me/relationships/{}", user_b_id);
     let send_res = client
-      .post(format!("/users/@me/relationships/{}", user_b_id))
+      .post(&url)
       .header(bearer_auth(&session_a.auth_token))
       .json(&json!({ "action": "friend" }))
       .dispatch()
       .await;
     assert_eq!(send_res.status().class(), StatusClass::Success);
 
+    let url = format!("/users/@me/relationships/{}", user_a_id);
     let accept_res = client
-      .post(format!("/users/@me/relationships/{}", user_a_id))
+      .post(&url)
       .header(bearer_auth(&session_b.auth_token))
       .json(&json!({ "action": "friend" }))
       .dispatch()

@@ -1,13 +1,13 @@
 #![allow(dead_code)]
 
-use std::sync::Arc;
+use std::{net::IpAddr, sync::Arc};
 
 use chrono::{DateTime, Timelike, Utc};
 use kestrel_config::{
   Config,
   structs::{
     database::{DatabaseConfig, PostgresConfig, RedisConfig},
-    features::{FeatureConfig, HCaptchaConfig, RegistrationConfig},
+    features::FeatureConfig,
     instance::InstanceConfig,
     server::{CorsConfig, ServerConfig},
   },
@@ -16,7 +16,7 @@ use kestrel_server::web;
 use rocket::{
   futures::join,
   http::{Header, StatusClass},
-  local::asynchronous::Client,
+  local::asynchronous::{Client, LocalRequest},
   tokio::task::JoinSet,
 };
 use serde_json::{Value, json};
@@ -68,8 +68,50 @@ impl Containers {
   }
 }
 
+pub struct TestClient {
+  inner: Client,
+  default_ip: IpAddr,
+}
+
+impl TestClient {
+  pub fn new(client: Client, default_ip: IpAddr) -> Self {
+    Self {
+      inner: client,
+      default_ip: default_ip.to_canonical(),
+    }
+  }
+
+  pub fn get<'c, 'u: 'c>(&'c self, uri: &'u str) -> LocalRequest<'c> {
+    self.inner.get(uri).header(rocket::http::Header::new(
+      "X-Real-IP",
+      self.default_ip.to_string(),
+    ))
+  }
+
+  pub fn post<'c, 'u: 'c>(&'c self, uri: &'u str) -> LocalRequest<'c> {
+    self.inner.post(uri).header(rocket::http::Header::new(
+      "X-Real-IP",
+      self.default_ip.to_string(),
+    ))
+  }
+
+  pub fn put<'c, 'u: 'c>(&'c self, uri: &'u str) -> LocalRequest<'c> {
+    self.inner.put(uri).header(rocket::http::Header::new(
+      "X-Real-IP",
+      self.default_ip.to_string(),
+    ))
+  }
+
+  pub fn delete<'c, 'u: 'c>(&'c self, uri: &'u str) -> LocalRequest<'c> {
+    self.inner.delete(uri).header(rocket::http::Header::new(
+      "X-Real-IP",
+      self.default_ip.to_string(),
+    ))
+  }
+}
+
 pub async fn run_with_containers(
-  visitor: impl AsyncFn(Containers, Arc<Client>),
+  visitor: impl AsyncFn(Containers, Arc<TestClient>),
 ) {
   let containers = Containers::up().await;
   let container_urls = containers.get_urls().await;
@@ -96,21 +138,15 @@ pub async fn run_with_containers(
         url: container_urls.redis,
       },
     },
-    features: FeatureConfig {
-      registration: RegistrationConfig {
-        enabled: true,
-        minimum_age: 16,
-      },
-      hcaptcha: HCaptchaConfig {
-        enabled: false,
-        sitekey: None,
-        secret: None,
-      },
-    },
+    features: FeatureConfig::default(),
   };
   let rocket = web(Some(config)).await.unwrap().ignite().await.unwrap();
   let client = Client::tracked(rocket).await.unwrap();
-  visitor(containers, Arc::new(client)).await;
+  visitor(
+    containers,
+    Arc::new(TestClient::new(client, IpAddr::from([127, 0, 0, 1]))),
+  )
+  .await;
 }
 
 /// Credentials used for authentication and testing purposes.
@@ -122,9 +158,9 @@ pub struct UserCredentials {
 }
 
 pub async fn register_test_users(
-  client: &Arc<Client>,
+  client: &Arc<TestClient>,
   count: usize,
-) -> Vec<UserCredentials> {
+) -> Result<Vec<UserCredentials>, Box<dyn std::error::Error + Send + Sync>> {
   let time = DateTime::<Utc>::default().nanosecond();
   let mut join_set = JoinSet::new();
   for i in 0..count {
@@ -142,15 +178,28 @@ pub async fn register_test_users(
       });
       let client = client.clone();
       let res = client.post("/auth/register").json(&body).dispatch().await;
-      assert_eq!(res.status().class(), StatusClass::Success);
-      UserCredentials {
+      if res.status().class() != StatusClass::Success {
+        return Err(Box::new(std::io::Error::other(format!(
+          "HTTP Error: {}",
+          res.status()
+        ))) as Box<dyn std::error::Error + Send + Sync>);
+      }
+      Ok(UserCredentials {
         email,
         username,
         password,
-      }
+      })
     });
   }
-  join_set.join_all().await
+
+  join_set
+    .join_all()
+    .await
+    .into_iter()
+    .try_fold(vec![], |mut acc, res| {
+      acc.push(res?);
+      Ok(acc)
+    })
 }
 
 #[derive(Debug, Clone, serde::Deserialize)]
@@ -159,7 +208,10 @@ pub struct TokenPair {
   pub refresh_token: String,
 }
 
-pub async fn login(client: &Arc<Client>, user: &UserCredentials) -> TokenPair {
+pub async fn login(
+  client: &Arc<TestClient>,
+  user: &UserCredentials,
+) -> TokenPair {
   let req_body = json!({
     "email": user.email,
     "password": user.password,

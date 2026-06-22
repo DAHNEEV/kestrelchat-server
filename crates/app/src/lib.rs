@@ -1,3 +1,5 @@
+pub mod catchers;
+pub mod guards;
 pub mod routes;
 pub mod utils;
 
@@ -6,14 +8,20 @@ use std::net::IpAddr;
 use kestrel_common::utils::geoip::GeoIpClient;
 use kestrel_config::Config as AppConfig;
 use kestrel_postgres::connection::Database;
-use kestrel_redis::connection::Redis;
+use kestrel_redis::{
+  connection::Redis,
+  operations::rate_limiting::use_endpoint::CompiledRateLimiter,
+};
 use rocket::Config as RocketConfig;
 
-use crate::utils::cors::{CorsFairing, preflight};
+use crate::{
+  catchers::too_many_requests::too_many_requests,
+  utils::cors::{CorsFairing, preflight},
+};
 use utils::errors::{
   bad_request, default_catcher, forbidden, internal_error, method_not_allowed,
-  not_acceptable, not_found, service_unavailable, too_many_requests,
-  unauthorized, unprocessable_entity,
+  not_acceptable, not_found, service_unavailable, unauthorized,
+  unprocessable_entity,
 };
 
 #[macro_use]
@@ -76,11 +84,15 @@ pub async fn web(
 
   let geoip = GeoIpClient::default();
 
+  let rate_limiter = CompiledRateLimiter::from(&config.features.rate_limiting);
+  rate_limiter.warm_up(&redis).await.ok();
+
   let rocket = rocket::custom(rocket_config)
     .attach(cors)
     .manage(postgres)
     .manage(redis)
     .manage(config)
+    .manage(rate_limiter)
     .manage(geoip)
     .mount("/", routes![preflight])
     .mount("/swagger", swagger)

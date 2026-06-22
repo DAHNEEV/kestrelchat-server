@@ -15,9 +15,9 @@ use kestrel_postgres::{
 use rocket::{State, serde::json::Json};
 use rocket_okapi::{okapi::schemars, openapi};
 use serde::{Deserialize, Serialize};
-use zeroize::{Zeroize, ZeroizeOnDrop};
+use zeroize::{Zeroize, ZeroizeOnDrop, Zeroizing};
 
-use crate::utils::errors::AppError;
+use crate::{guards::rate_limit::WithinRateLimit, utils::errors::AppError};
 
 #[derive(Deserialize, Zeroize, ZeroizeOnDrop, schemars::JsonSchema)]
 pub struct RegisterRequest {
@@ -38,6 +38,7 @@ pub struct RegisterResponse {
 #[openapi(tag = "Authentication")]
 #[post("/register", data = "<req>")]
 pub async fn register(
+  _within_rate_limit: WithinRateLimit,
   postgres: &State<Database>,
   config: &State<Config>,
   req: Json<RegisterRequest>,
@@ -82,9 +83,10 @@ pub async fn register(
     return Err(AppError::bad_request("AGE_TOO_YOUNG"));
   }
 
-  let hashed_password = hasher::password_hash(req.password.as_bytes())
-    .await
-    .map_err(|_| AppError::internal_error("HASH_FAILED"))?;
+  let hashed_password =
+    hasher::password_hash(Zeroizing::new(req.password.as_bytes().to_vec()))
+      .await
+      .map_err(|_| AppError::internal_error("HASH_FAILED"))?;
 
   let mut tx = postgres
     .pool()
