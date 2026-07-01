@@ -27,7 +27,7 @@ pub async fn revoke_all_sessions(
     conn.del(&auth_key).await.map_err(RedisError::Redis)?;
 
     conn
-      .srem(&user_key, &token)
+      .srem(&user_key, token)
       .await
       .map_err(RedisError::Redis)?;
   }

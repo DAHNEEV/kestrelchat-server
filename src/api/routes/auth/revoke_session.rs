@@ -94,7 +94,7 @@ pub async fn revoke_session(
   let user_id = auth_ctx.user_id;
 
   // Check if this session belongs to user
-  lookup_session(postgres, &user_id, &session_id).await?;
+  lookup_session(postgres, &user_id, session_id).await?;
 
   check_password(postgres, &user_id, &req.password).await?;
 
