@@ -94,12 +94,7 @@ pub async fn revoke_session(
   let user_id = auth_ctx.user_id;
 
   // Check if this session belongs to user
-  lookup_session(postgres, &user_id, &session_id)
-    .await
-    .map_err(|e| match e {
-      DatabaseError::NotFound => AppError::unauthorized("INVALID_CREDENTIALS"),
-      other => AppError::from(other),
-    })?;
+  lookup_session(postgres, &user_id, &session_id).await?;
 
   check_password(postgres, &user_id, &req.password).await?;
 
